@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Checkout</title>
+    <style>
+        :root{
+          --brand:#2874F0;      /* Primary */
+          --accent:#2E7D32;     /* Accent (success/savings) */
+          --bg:#F3F4F6;         /* Light neutral */
+          --fg:#0F172A;         /* Foreground/dark */
+          --white:#FFFFFF;      /* White */
+        }
+        /* Typography - system stack (1 family) */
+        html{box-sizing:border-box}
+        *,*::before,*::after{box-sizing:inherit}
+        body{
+          margin:0; color:var(--fg); background:var(--bg);
+          font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji";
+          line-height:1.5;
+        }
+        a{color:var(--brand); text-decoration:none}
+        a:hover{text-decoration:underline}
+        img{max-width:100%; height:auto; display:block}
+
+        /* Layout */
+        .site-header{
+          background:var(--white); border-bottom:1px solid #e5e7eb;
+        }
+        .container{
+          width:100%; max-width:1100px; margin:0 auto; padding:16px;
+        }
+        .brand{
+          display:flex; align-items:center; gap:10px; padding:12px 0;
+        }
+        .brand-badge{
+          width:36px; height:36px; border-radius:8px; background:var(--brand);
+          display:inline-flex; align-items:center; justify-content:center; color:var(--white); font-weight:700;
+        }
+        .brand-name{font-weight:700; letter-spacing:0.2px}
+
+        .checkout{
+          display:grid; gap:16px; margin-top:12px;
+          grid-template-columns: 1fr;
+        }
+        @media (min-width: 992px){
+          .checkout{
+            grid-template-columns: 1.6fr 1fr;
+            align-items:start;
+          }
+          .summary{
+            position:sticky; top:16px;
+          }
+        }
+
+        /* Cards */
+        .card{
+          background:var(--white);
+          border:1px solid #e5e7eb;
+          border-radius:12px;
+          padding:16px;
+        }
+        .card + .card{margin-top:12px}
+        .section-title{
+          font-weight:700; font-size:18px; margin:0 0 12px;
+        }
+
+        /* Form */
+        form{display:grid; gap:12px}
+        .grid-2{
+          display:grid; gap:12px; grid-template-columns:1fr;
+        }
+        @media (min-width: 640px){
+          .grid-2{grid-template-columns:1fr 1fr}
+        }
+        label{display:block; font-size:14px; font-weight:600; margin-bottom:6px}
+        .input{
+          width:100%; padding:10px 12px; font-size:15px;
+          background:var(--white); border:1px solid #d1d5db; border-radius:8px;
+          outline:none;
+        }
+        .input:focus{border-color:var(--brand); box-shadow:0 0 0 3px rgba(40,116,240,0.15)}
+        .helper{font-size:12px; color:#6b7280; margin-top:6px}
+        .inline{
+          display:flex; align-items:center; gap:10px;
+        }
+        .radio-group, .checkbox-group{display:grid; gap:10px}
+        .radio{
+          display:flex; align-items:center; gap:10px; padding:10px; border:1px solid #e5e7eb; border-radius:8px; background:#fafafa;
+        }
+        .radio input{accent-color:var(--brand)}
+        .price-chip{
+          margin-left:auto; font-weight:700;
+        }
+
+        /* Summary */
+        .summary .line{
+          display:flex; align-items:center; justify-content:space-between; margin:8px 0;
+        }
+        .summary .total{
+          font-weight:800; font-size:18px;
+        }
+        .savings{color:var(--accent); font-weight:700; font-size:14px}
+        .coupon{
+          display:flex; gap:8px; margin-top:8px;
+        }
+        .btn{
+          display:inline-flex; align-items:center; justify-content:center;
+          gap:8px; border:0; cursor:pointer; border-radius:10px;
+          padding:12px 14px; font-weight:700;
+        }
+        .btn-primary{
+          background:var(--brand); color:var(--white);
+        }
+        .btn-primary[disabled]{opacity:0.6; cursor:not-allowed}
+        .btn-secondary{
+          background:#eef2ff; color:#1e3a8a;
+        }
+        .note{font-size:12px; color:#6b7280}
+
+        /* Footer safety badges */
+        .badges{
+          display:flex; gap:12px; flex-wrap:wrap; margin-top:10px;
+        }
+        .badge{
+          background:#f9fafb; border:1px solid #e5e7eb; border-radius:999px; padding:6px 10px; font-size:12px; font-weight:600;
+        }
+
+        /* Alerts */
+        .alert{
+          border-radius:10px; padding:10px 12px; font-size:14px; margin-top:8px;
+          background:#eff6ff; border:1px solid #bfdbfe; color:#1e40af;
+        }
+
+        /* Accessibility helpers */
+        .sr-only{
+          position:absolute; width:1px; height:1px; padding:0; margin:-1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+        }
+    </style>
+</head>
+<body>
+<header class="site-header" role="banner">
+    <div class="container brand" aria-label="Site header">
+        <div class="brand-badge" aria-hidden="true">C</div>
+        <div>
+            <div class="brand-name">Commerce</div>
+            <div class="note">Secure Checkout</div>
+        </div>
+    </div>
+</header>
+
+<main class="container checkout" role="main">
+    <section aria-label="Checkout form">
+        <form id="checkoutForm" action="/orders/checkout" method="post" novalidate>
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
+        Contact
+            <div class="card" aria-labelledby="contactTitle">
+                <h2 id="contactTitle" class="section-title">Contact information</h2>
+                <div class="grid-2">
+                    <div>
+                        <label for="firstName">First name</label>
+                        <input id="firstName" name="firstName" class="input" autocomplete="given-name" required />
+                    </div>
+                    <div>
+                        <label for="lastName">Last name</label>
+                        <input id="lastName" name="lastName" class="input" autocomplete="family-name" required />
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <label for="email">Email</label>
+                        <input id="email" name="email" type="email" class="input" autocomplete="email" inputmode="email" required />
+                        <p class="helper">We'll send your order confirmation here.</p>
+                    </div>
+                    <div>
+                        <label for="phone">Phone</label>
+                        <input id="phone" name="phone" type="tel" class="input" autocomplete="tel" inputmode="tel" pattern="^[0-9+\-\s]{7,15}$" required />
+                    </div>
+                </div>
+            </div>
+
+            Shipping address
+            <div class="card" aria-labelledby="shipTitle">
+                <h2 id="shipTitle" class="section-title">Shipping address</h2>
+                <div>
+                    <label for="address1">Address line 1</label>
+                    <input id="address1" name="address1" class="input" autocomplete="address-line1" required />
+                </div>
+                <div>
+                    <label for="address2">Address line 2 <span class="note">(optional)</span></label>
+                    <input id="address2" name="address2" class="input" autocomplete="address-line2" />
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <label for="city">City</label>
+                        <input id="city" name="city" class="input" autocomplete="address-level2" required />
+                    </div>
+                    <div>
+                        <label for="state">State / Province</label>
+                        <input id="state" name="state" class="input" autocomplete="address-level1" required />
+                    </div>
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <label for="zip">Postal code</label>
+                        <input id="zip" name="zip" class="input" autocomplete="postal-code" inputmode="numeric" pattern="^[0-9]{4,10}$" required />
+                    </div>
+                    <div>
+                        <label for="country">Country</label>
+                        <input id="country" name="country" class="input" autocomplete="country-name" required />
+                    </div>
+                </div>
+            </div>
+
+            Delivery options
+            <div class="card" aria-labelledby="deliveryTitle">
+                <h2 id="deliveryTitle" class="section-title">Delivery options</h2>
+                <div class="radio-group" role="radiogroup" aria-labelledby="deliveryTitle">
+                    <label class="radio">
+                        <input type="radio" name="shippingMethod" value="standard" data-price="0" checked />
+                        <span>Standard (4–6 days)</span>
+                        <span class="price-chip">Free</span>
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="shippingMethod" value="express" data-price="49" />
+                        <span>Express (1–2 days)</span>
+                        <span class="price-chip">₹49</span>
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="shippingMethod" value="priority" data-price="149" />
+                        <span>Priority (Next-day)</span>
+                        <span class="price-chip">₹149</span>
+                    </label>
+                </div>
+                <div class="alert" role="status">Most items ship from our nearest warehouse.</div>
+            </div>
+
+            Payment
+            <div class="card" aria-labelledby="paymentTitle">
+                <h2 id="paymentTitle" class="section-title">Payment</h2>
+
+                <div class="radio-group" role="radiogroup" aria-label="Payment method">
+                    <label class="radio">
+                        <input type="radio" name="paymentMethod" value="card" checked />
+                        <span>Credit / Debit Card</span>
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="paymentMethod" value="upi" />
+                        <span>UPI</span>
+                    </label>
+                    <label class="radio">
+                        <input type="radio" name="paymentMethod" value="cod" />
+                        <span>Cash on Delivery</span>
+                    </label>
+                </div>
+
+                Card details
+                <div id="cardFields">
+                    <div class="grid-2">
+                        <div>
+                            <label for="cardName">Name on card</label>
+                            <input id="cardName" name="cardName" class="input" autocomplete="cc-name" required />
+                        </div>
+                        <div>
+                            <label for="cardNumber">Card number</label>
+                            <input id="cardNumber" name="cardNumber" class="input" inputmode="numeric" autocomplete="cc-number" maxlength="19" placeholder="1234 5678 9012 3456" required />
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div>
+                            <label for="cardExpiry">Expiry (MM/YY)</label>
+                            <input id="cardExpiry" name="cardExpiry" class="input" inputmode="numeric" autocomplete="cc-exp" maxlength="5" placeholder="MM/YY" required />
+                        </div>
+                        <div>
+                            <label for="cardCvv">CVV</label>
+                            <input id="cardCvv" name="cardCvv" class="input" inputmode="numeric" autocomplete="cc-csc" maxlength="4" placeholder="123" required />
+                        </div>
+                    </div>
+                    <p class="note">Your payment details are encrypted and never stored on our servers.</p>
+                </div>
+
+                UPI details
+                <div id="upiFields" style="display:none;">
+                    <label for="upiId">Enter UPI ID</label>
+                    <input id="upiId" name="upiId" class="input" placeholder="name@bank" pattern="^[\w.-]{2,}@[a-zA-Z]{2,}$" />
+                    <p class="helper">We'll send a collect request to your UPI app.</p>
+                </div>
+
+                COD note
+                <div id="codNote" class="alert" style="display:none;">Cash on Delivery available for orders under ₹10,000.</div>
+            </div>
+
+            Billing
+            <div class="card" aria-labelledby="billingTitle">
+                <h2 id="billingTitle" class="section-title">Billing address</h2>
+                <div class="checkbox-group">
+                    <label class="inline">
+                        <input id="sameAsShipping" type="checkbox" checked />
+                        <span>Same as shipping address</span>
+                    </label>
+                </div>
+                <div id="billingFields" style="display:none; margin-top:8px;">
+                    <div>
+                        <label for="billingAddress1">Address line 1</label>
+                        <input id="billingAddress1" name="billingAddress1" class="input" />
+                    </div>
+                    <div>
+                        <label for="billingAddress2">Address line 2</label>
+                        <input id="billingAddress2" name="billingAddress2" class="input" />
+                    </div>
+                    <div class="grid-2">
+                        <div>
+                            <label for="billingCity">City</label>
+                            <input id="billingCity" name="billingCity" class="input" />
+                        </div>
+                        <div>
+                            <label for="billingState">State / Province</label>
+                            <input id="billingState" name="billingState" class="input" />
+                        </div>
+                    </div>
+                    <div class="grid-2">
+                        <div>
+                            <label for="billingZip">Postal code</label>
+                            <input id="billingZip" name="billingZip" class="input" inputmode="numeric" pattern="^[0-9]{4,10}$" />
+                        </div>
+                        <div>
+                            <label for="billingCountry">Country</label>
+                            <input id="billingCountry" name="billingCountry" class="input" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            Terms
+            <div class="card">
+                <label class="inline">
+                    <input id="agree" type="checkbox" required />
+                    <span>I agree to the Terms and Privacy Policy</span>
+                </label>
+                <div id="formAlert" class="alert" role="alert" style="display:none;">Please complete all required fields.</div>
+                <div class="badges" aria-label="Secure badges">
+                    <span class="badge">PCI DSS Secured</span>
+                    <span class="badge">SSL Encrypted</span>
+                    <span class="badge">Trusted Payments</span>
+                </div>
+            </div>
+
+            <!-- totalAmount, discount and other computed fields -->
+            <input type="hidden" name="totalAmount" th:value="${grandTotal}" />
+            <input type="hidden" name="discount" th:value="${discount}" />
+
+
+            <div class="card" style="display:flex; gap:10px; align-items:center; justify-content:flex-end;">
+                <a href="/confirmation" class="btn btn-secondary" aria-label="Back to cart">Back to cart</a>
+                <button id="placeOrderBtn" type="submit" class="btn btn-primary">
+                    Place order
+                </button>
+            </div>
+        </form>
+    </section>
+
+    <aside class="summary" aria-label="Order summary">
+        <div class="card">
+            <h2 class="section-title">Order summary</h2>
+            <!-- Item List -->
+            <div th:each="item : ${cartItems}" class="line">
+                <span th:text="${item.book.title} + ' × ' + ${item.quantity}"></span>
+                <span th:text="'₹' + ${item.book.price * item.quantity}"></span>
+            </div>
+
+            <!-- Totals -->
+            <div class="line"><span>Items</span><span th:text="'₹' + ${itemsTotal}"></span></div>
+            <div class="line"><span>Discount</span><span th:text="'– ₹' + ${discount}" class="savings"></span></div>
+            ...
+            <div class="line total"><span>Grand total</span><span th:text="'₹' + ${grandTotal}" aria-live="polite"></span></div>
+
+            <div class="coupon">
+                <input id="coupon" class="input" placeholder="Coupon code" aria-label="Coupon code" />
+                <button id="applyCoupon" class="btn btn-secondary" type="button">Apply</button>
+            </div>
+            <p class="note" id="couponNote" style="display:none;">Coupon applied. Savings updated.</p>
+        </div>
+
+        <div class="card">
+            <h3 class="section-title">Need help?</h3>
+            <p class="note">Call us at 1-800-000-0000 or email support@example.com</p>
+        </div>
+    </aside>
+</main>
+
+<script>
+    (function(){
+      const form = document.getElementById('checkoutForm');
+      const placeBtn = document.getElementById('placeOrderBtn');
+      const agree = document.getElementById('agree');
+      const alertBox = document.getElementById('formAlert');
+
+      const sameAs = document.getElementById('sameAsShipping');
+      const billingFields = document.getElementById('billingFields');
+
+      const cardFields = document.getElementById('cardFields');
+      const upiFields = document.getElementById('upiFields');
+      const codNote = document.getElementById('codNote');
+
+      const itemsTotalEl = document.getElementById('itemsTotal');
+      const shippingFeeEl = document.getElementById('shippingFee');
+      const taxAmountEl = document.getElementById('taxAmount');
+      const grandTotalEl = document.getElementById('grandTotal');
+
+      const couponInput = document.getElementById('coupon');
+      const applyCouponBtn = document.getElementById('applyCoupon');
+      const couponNote = document.getElementById('couponNote');
+
+      // For demo purposes; replace with server values (parseInt of currency)
+      let itemsTotal = 3499;
+      let discount = 300;
+      let shippingFee = 0;
+      let taxAmount = 180;
+      let couponDiscount = 0;
+
+      function formatINR(n){ return '₹' + n.toLocaleString('en-IN'); }
+
+      function recalc(){
+        const shipping = document.querySelector('input[name="shippingMethod"]:checked');
+        shippingFee = shipping ? parseInt(shipping.dataset.price || '0', 10) : 0;
+        const total = Math.max(0, itemsTotal - discount - couponDiscount) + shippingFee + taxAmount;
+        shippingFeeEl.textContent = shippingFee === 0 ? 'Free' : formatINR(shippingFee);
+        grandTotalEl.textContent = formatINR(total);
+      }
+      recalc();
+
+      document.querySelectorAll('input[name="shippingMethod"]').forEach(r => {
+        r.addEventListener('change', recalc);
+      });
+
+      // Payment method toggle
+      document.querySelectorAll('input[name="paymentMethod"]').forEach(r => {
+        r.addEventListener('change', () => {
+          const val = document.querySelector('input[name="paymentMethod"]:checked').value;
+          cardFields.style.display = val === 'card' ? '' : 'none';
+          upiFields.style.display = val === 'upi' ? '' : 'none';
+          codNote.style.display = val === 'cod' ? '' : 'none';
+          // Required toggling
+          cardFields.querySelectorAll('input').forEach(i => i.required = (val === 'card'));
+          document.getElementById('upiId').required = (val === 'upi');
+        });
+      });
+
+      // Billing same as shipping toggle
+      sameAs.addEventListener('change', () => {
+        billingFields.style.display = sameAs.checked ? 'none' : '';
+        billingFields.querySelectorAll('input').forEach(i => i.required = !sameAs.checked);
+      });
+
+      // Card formatting
+      const cardNumber = document.getElementById('cardNumber');
+      const cardExpiry = document.getElementById('cardExpiry');
+      const cardCvv = document.getElementById('cardCvv');
+
+      function numbersOnly(s){ return s.replace(/\D+/g,''); }
+
+      cardNumber.addEventListener('input', () => {
+        let v = numbersOnly(cardNumber.value).slice(0,16);
+        cardNumber.value = v.replace(/(\d{4})(?=\d)/g, '$1 ');
+      });
+
+      cardExpiry.addEventListener('input', () => {
+        let v = numbersOnly(cardExpiry.value).slice(0,4);
+        if(v.length >= 3){ v = v.slice(0,2) + '/' + v.slice(2); }
+        cardExpiry.value = v;
+      });
+
+      cardCvv.addEventListener('input', () => {
+        cardCvv.value = numbersOnly(cardCvv.value).slice(0,4);
+      });
+
+      // Enable Place Order only when valid and agreed
+      function updateSubmitState(){
+        const ok = form.checkValidity() && agree.checked;
+        placeBtn.disabled = !ok;
+        alertBox.style.display = ok ? 'none' : 'block';
+      }
+      form.addEventListener('input', updateSubmitState);
+      agree.addEventListener('change', updateSubmitState);
+      form.addEventListener('change', updateSubmitState);
+      updateSubmitState();
+
+          // Apply coupon (demo 5% off)
+      applyCouponBtn.addEventListener('click', () => {
+        const code = couponInput.value.trim().toUpperCase();
+        if(!code){ couponNote.textContent = 'Enter a coupon code.'; couponNote.style.display = 'block'; return; }
+        // Demo: any non-empty code applies 5% of itemsTotal, capped at 500
+        couponDiscount = Math.min(500, Math.round(itemsTotal * 0.05));
+        couponNote.textContent = `Coupon applied. Extra savings: ${formatINR(couponDiscount)}.`;
+        couponNote.style.display = 'block';
+        recalc();
+      });
+
+      // Prevent submission if invalid; display built-in errors
+      form.addEventListener('submit', (e) => {
+        if(!form.checkValidity()){
+          e.preventDefault();
+          alertBox.style.display = 'block';
+          form.reportValidity();
+        }
+      });
+
+      // Example: reflect placeholders to ensure consistent formatting
+      itemsTotalEl.textContent = formatINR(itemsTotal);
+      taxAmountEl.textContent = formatINR(taxAmount);
+      recalc();
+    })();
+</script>
+</body>
+</html>

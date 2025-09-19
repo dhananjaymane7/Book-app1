@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Exchange Request | BookStore Pro</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com"/>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+    <link href="https://fonts.googleapis.com/css2?family=Amazon+Ember:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+
+    <style>
+        :root {
+            /* Amazon/Flipkart inspired colors */
+            --primary-orange: #ff9f00;
+            --primary-blue: #232f3e;
+            --accent-blue: #007185;
+            --light-blue: #e3f2fd;
+            --success-green: #067d62;
+            --warning-orange: #ff6b35;
+            --gray-50: #fafafa;
+            --gray-100: #f5f5f5;
+            --gray-200: #eeeeee;
+            --gray-300: #e0e0e0;
+            --gray-400: #bdbdbd;
+            --gray-500: #9e9e9e;
+            --gray-600: #757575;
+            --gray-700: #616161;
+            --gray-800: #424242;
+            --gray-900: #212121;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.07);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Amazon Ember', Arial, sans-serif;
+            margin: 0;
+            background-color: var(--gray-100);
+            color: var(--gray-800);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--accent-blue) 100%);
+            color: var(--white);
+            padding: 1rem 0;
+            box-shadow: var(--shadow-md);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--white);
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .breadcrumb span {
+            margin: 0 0.5rem;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 2rem;
+        }
+
+        /* Progress Steps */
+        .progress-section {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            height: fit-content;
+        }
+
+        .progress-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 1rem;
+        }
+
+        .progress-steps {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .progress-step {
+            display: flex;
+            align-items: center;
+            padding: 0.75rem 0;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .progress-step:last-child {
+            border-bottom: none;
+        }
+
+        .step-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: var(--primary-orange);
+            color: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-right: 0.75rem;
+        }
+
+        .step-number.completed {
+            background: var(--success-green);
+        }
+
+        .step-number.pending {
+            background: var(--gray-400);
+        }
+
+        .step-text {
+            font-size: 0.9rem;
+            color: var(--gray-700);
+        }
+
+        /* Main Form */
+        .exchange-form {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+        }
+
+        .form-header {
+            background: linear-gradient(135deg, var(--light-blue) 0%, #f8f9ff 100%);
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--gray-200);
+            border-radius: var(--border-radius) var(--border-radius) 0 0;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+            margin: 0 0 0.5rem 0;
+        }
+
+        .form-subtitle {
+            color: var(--gray-600);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .form-body {
+            padding: 2rem;
+        }
+
+        .form-section {
+            margin-bottom: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary-orange);
+            display: inline-block;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--gray-800);
+        }
+
+        .required {
+            color: var(--warning-orange);
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            font-size: 0.95rem;
+            border: 2px solid var(--gray-300);
+            border-radius: var(--border-radius);
+            background-color: var(--white);
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+            box-shadow: 0 0 0 3px rgba(255, 159, 0, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-500);
+            font-size: 1rem;
+        }
+
+        .input-group input {
+            padding-left: 2.5rem;
+        }
+
+        /* Buttons */
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .btn {
+            padding: 0.875rem 2rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-orange) 0%, #ff8f00 100%);
+            color: var(--white);
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #ff8f00 0%, #ff6f00 100%);
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--white);
+            color: var(--gray-700);
+            border: 2px solid var(--gray-300);
+        }
+
+        .btn-secondary:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-400);
+        }
+
+        /* Help Section */
+        .help-section {
+            background: var(--white);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--gray-200);
+            margin-top: 1rem;
+        }
+
+        .help-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-800);
+            margin-bottom: 1rem;
+        }
+
+        .help-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+
+        .help-icon {
+            color: var(--accent-blue);
+            margin-right: 0.5rem;
+            margin-top: 0.1rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: var(--primary-blue);
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+                gap: 1rem;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-body {
+                padding: 1.5rem;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .header-content {
+                padding: 0 1rem;
+            }
+
+            .breadcrumb {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Header -->
+<header class="header">
+    <div class="header-content">
+        <div class="logo">BookStore Pro</div>
+        <div class="breadcrumb">
+            <span>Home</span>
+            <span>›</span>
+            <span>My Orders</span>
+            <span>›</span>
+            <span>Exchange Request</span>
+        </div>
+    </div>
+</header>
+
+<!-- Main Container -->
+<div class="container">
+    <!-- Main Form -->
+    <div class="exchange-form">
+        <div class="form-header">
+            <h1 class="form-title">Exchange Request</h1>
+            <p class="form-subtitle">Please fill out the form below to request an exchange for your book order</p>
+        </div>
+
+        <div class="form-body">
+            <form th:action="@{/exchange/save}" th:object="${exchange}" method="post">
+                <!-- Order Information -->
+                <div class="form-section">
+                    <h3 class="section-title">Order Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="orderNumber">Order Number <span class="required">*</span></label>
+                            <div class="input-group">
+                                <span class="input-icon">#</span>
+                                <input type="text" id="orderNumber" th:field="*{orderNumber}" placeholder="e.g., ORD123456789" required/>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="email">Email Address <span class="required">*</span></label>
+                            <div class="input-group">
+                                <span class="input-icon">@</span>
+                                <input type="email" id="email" th:field="*{email}" placeholder="your.email@example.com" required/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product Information -->
+                <div class="form-section">
+                    <h3 class="section-title">Product Information</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bookTitle">Book Title <span class="required">*</span></label>
+                            <input type="text" id="bookTitle" th:field="*{bookTitle}" placeholder="Enter the complete book title" required/>
+                        </div>
+                        <div class="form-group">
+                            <label for="reason">Reason for Exchange <span class="required">*</span></label>
+                            <select id="reason" th:field="*{reason}" required>
+                                <option value="">Select a reason</option>
+                                <option value="damaged">Product Damaged</option>
+                                <option value="wrong-item">Wrong Item Received</option>
+                                <option value="defective">Defective Product</option>
+                                <option value="not-as-described">Not as Described</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="details">Additional Details</label>
+                        <textarea id="details" th:field="*{details}" placeholder="Please provide detailed information about the issue, including any specific damage or problems you encountered..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="button-group">
+                    <button type="button" class="btn btn-secondary">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <span>📋</span>
+                        Submit Exchange Request
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div>
+        <!-- Progress Steps -->
+        <div class="progress-section">
+            <h3 class="progress-title">Exchange Process</h3>
+            <ul class="progress-steps">
+                <li class="progress-step">
+                    <span class="step-number">1</span>
+                    <span class="step-text">Submit Request</span>
+                </li>
+                <li class="progress-step">
+                    <span class="step-number pending">2</span>
+                    <span class="step-text">Review & Approval</span>
+                </li>
+                <li class="progress-step">
+                    <span class="step-number pending">3</span>
+                    <span class="step-text">Return Shipping</span>
+                </li>
+                <li class="progress-step">
+                    <span class="step-number pending">4</span>
+                    <span class="step-text">Replacement Sent</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Help Section -->
+        <div class="help-section">
+            <h3 class="help-title">Need Help?</h3>
+            <div class="help-item">
+                <span class="help-icon">📞</span>
+                <span>Call us: 1-800-BOOKS-24</span>
+            </div>
+            <div class="help-item">
+                <span class="help-icon">💬</span>
+                <span>Live Chat: Available 24/7</span>
+            </div>
+            <div class="help-item">
+                <span class="help-icon">📧</span>
+                <span>Email: support@bookstore.com</span>
+            </div>
+            <div class="help-item">
+                <span class="help-icon">⏰</span>
+                <span>Response time: Within 24 hours</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    <p>&copy; 2025 BookStore Pro. All rights reserved. | Exchange Policy | Terms of Service | Privacy Policy</p>
+</footer>
+
+</body>
+</html>

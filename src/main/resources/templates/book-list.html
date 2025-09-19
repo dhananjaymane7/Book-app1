@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book List</title>
+    <style>
+        /* Global Styles */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f1f5f9;
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+
+        .container {
+            width: 90%;
+            margin: 30px auto;
+            padding: 40px;
+            background-color: #fff;
+            box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        h1 {
+            font-size: 32px;
+            text-align: center;
+            color: #3a3f58;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid #e1e5eb;
+            font-size: 16px;
+        }
+
+        th {
+            background-color: #f7f8fb;
+            color: #5f6368;
+            font-weight: 600;
+        }
+
+        td {
+            color: #4a4a4a;
+        }
+
+        tr:hover {
+            background-color: #f1f4f7;
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+        }
+
+        .action-buttons a {
+            padding: 10px 16px;
+            margin: 0 5px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 14px;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: background-color 0.3s, transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .action-buttons a:hover {
+            background-color: #0056b3;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-buttons a.delete {
+            background-color: #FF5733;
+        }
+
+        .action-buttons a.delete:hover {
+            background-color: #e04e2f;
+        }
+
+        .action-buttons a:active {
+            transform: translateY(1px); /* Slight press effect */
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .container {
+                width: 95%;
+                padding: 20px;
+            }
+
+            table, th, td {
+                font-size: 14px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .action-buttons a {
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Books List</h1>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Author</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="book : ${books}">
+            <td th:text="${book.id}"></td>
+            <td th:text="${book.title}"></td>
+            <td th:text="${book.author}"></td>
+            <td th:text="${book.category}"></td>
+            <td th:text="${book.description}"></td>
+            <td th:text="${book.price}"></td>
+            <td th:text="${book.stock}"></td>
+            <td class="action-buttons">
+                <a th:href="@{/books/edit/{id}(id=${book.id})}">Edit</a>
+                <a class="delete" th:href="@{/books/delete/{id}(id=${book.id})}" onclick="return confirm('Are you sure you want to delete this book?')">Delete</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

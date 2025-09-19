@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Edit Book</title>
+    <style>
+        /* Enhanced professional UI with improved colors, typography, and visual hierarchy */
+        :root{
+          --primary: #3B82F6;      /* Enhanced blue */
+          --primary-dark: #2563EB; /* Darker blue for hover */
+          --white: #FFFFFF;        /* Pure white */
+          --bg: #F8FAFC;          /* Softer background */
+          --card-bg: #FFFFFF;     /* Card background */
+          --text: #1E293B;        /* Rich dark text */
+          --text-muted: #64748B;  /* Muted text */
+          --border: #E2E8F0;      /* Subtle borders */
+          --success: #10B981;     /* Green for success */
+          --danger: #EF4444;      /* Red for errors */
+          --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+          --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        * {
+          box-sizing: border-box;
+        }
+
+        html, body {
+          height: 100%;
+          margin: 0;
+          padding: 0;
+        }
+
+        body {
+          background: linear-gradient(135deg, var(--bg) 0%, #F1F5F9 100%);
+          color: var(--text);
+          font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+          line-height: 1.6;
+          font-size: 14px;
+        }
+
+        .page {
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+
+        header {
+          background: var(--white);
+          border-bottom: 1px solid var(--border);
+          box-shadow: var(--shadow);
+          position: sticky;
+          top: 0;
+          z-index: 10;
+        }
+
+        .header-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 20px 24px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+        }
+
+        .title {
+          margin: 0;
+          font-size: 24px;
+          font-weight: 700;
+          color: var(--text);
+          letter-spacing: -0.025em;
+        }
+
+        .subtitle {
+          margin: 4px 0 0 0;
+          color: var(--text-muted);
+          font-size: 14px;
+          font-weight: 400;
+        }
+
+        main {
+          flex: 1;
+          padding: 32px 0;
+        }
+
+        .container {
+          max-width: 800px;
+          margin: 0 auto;
+          padding: 0 24px;
+        }
+
+        .card {
+          background: var(--card-bg);
+          border-radius: 16px;
+          box-shadow: var(--shadow-lg);
+          overflow: hidden;
+          border: 1px solid var(--border);
+          transition: box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .card-header {
+          padding: 32px 32px 0 32px;
+          border-bottom: 1px solid var(--border);
+          margin-bottom: 0;
+        }
+
+        .card-title {
+          margin: 0 0 8px 0;
+          font-size: 20px;
+          font-weight: 600;
+          color: var(--text);
+        }
+
+        .card-description {
+          margin: 0 0 24px 0;
+          color: var(--text-muted);
+          font-size: 14px;
+        }
+
+        .card-body {
+          padding: 32px;
+        }
+
+        .form-grid {
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+
+        @media (min-width: 768px) {
+          .form-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 24px;
+          }
+          .col-span-2 {
+            grid-column: span 2;
+          }
+        }
+
+        .form-group {
+          display: flex;
+          flex-direction: column;
+        }
+
+        label {
+          display: block;
+          font-weight: 600;
+          margin-bottom: 8px;
+          font-size: 14px;
+          color: var(--text);
+        }
+
+        .required::after {
+          content: " *";
+          color: var(--danger);
+        }
+
+        input, textarea, select {
+          width: 100%;
+          appearance: none;
+          background: var(--white);
+          color: var(--text);
+          border: 2px solid var(--border);
+          border-radius: 12px;
+          padding: 14px 16px;
+          font-size: 14px;
+          font-family: inherit;
+          transition: all 0.2s ease;
+          outline: none;
+        }
+
+        textarea {
+          resize: vertical;
+          min-height: 120px;
+          font-family: inherit;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+          color: var(--text-muted);
+        }
+
+        input:focus, textarea:focus, select:focus {
+          border-color: var(--primary);
+          box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+          transform: translateY(-1px);
+        }
+
+        input:hover, textarea:hover, select:hover {
+          border-color: var(--primary);
+        }
+
+        /* Number inputs: remove spinners */
+        input[type="number"] {
+          -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
+
+        .helper {
+          margin-top: 6px;
+          font-size: 12px;
+          color: var(--text-muted);
+          font-style: italic;
+        }
+
+        .actions {
+          display: flex;
+          gap: 16px;
+          align-items: center;
+          justify-content: flex-end;
+          margin-top: 32px;
+          padding-top: 24px;
+          border-top: 1px solid var(--border);
+        }
+
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+          padding: 14px 24px;
+          border-radius: 12px;
+          border: 2px solid transparent;
+          font-weight: 600;
+          font-size: 14px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          text-decoration: none;
+          font-family: inherit;
+          min-width: 120px;
+        }
+
+        .btn:active {
+          transform: translateY(1px);
+        }
+
+        .btn-primary {
+          background: var(--primary);
+          color: var(--white);
+          border-color: var(--primary);
+        }
+
+        .btn-primary:hover {
+          background: var(--primary-dark);
+          border-color: var(--primary-dark);
+          transform: translateY(-2px);
+          box-shadow: var(--shadow-lg);
+        }
+
+        .btn-outline {
+          background: transparent;
+          color: var(--text-muted);
+          border-color: var(--border);
+        }
+
+        .btn-outline:hover {
+          background: var(--bg);
+          color: var(--text);
+          border-color: var(--text-muted);
+        }
+
+        .alert {
+          margin: 0 32px 32px 32px;
+          border: 1px solid;
+          border-radius: 12px;
+          padding: 16px 20px;
+          font-size: 14px;
+          font-weight: 500;
+          display: flex;
+          align-items: center;
+          gap: 12px;
+        }
+
+        .alert.error {
+          background: #FEF2F2;
+          border-color: var(--danger);
+          color: #991B1B;
+        }
+
+        .alert.success {
+          background: #F0FDF4;
+          border-color: var(--success);
+          color: #166534;
+        }
+
+        .alert::before {
+          content: "";
+          width: 20px;
+          height: 20px;
+          border-radius: 50%;
+          flex-shrink: 0;
+        }
+
+        .alert.success::before {
+          background: var(--success);
+          background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='m13.854 3.646-7.5 7.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6 10.293l7.146-7.147a.5.5 0 0 1 .708.708z'/%3e%3c/svg%3e");
+        }
+
+        .alert.error::before {
+          background: var(--danger);
+          background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z'/%3e%3cpath d='M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 4.995z'/%3e%3c/svg%3e");
+        }
+
+        /* Utility */
+        .sr-only {
+          position: absolute;
+          width: 1px;
+          height: 1px;
+          padding: 0;
+          margin: -1px;
+          overflow: hidden;
+          clip: rect(0, 0, 0, 0);
+          white-space: nowrap;
+          border: 0;
+        }
+
+        /* Loading animation for form submission */
+        .btn-primary:disabled {
+          opacity: 0.7;
+          cursor: not-allowed;
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 767px) {
+          .header-inner {
+            padding: 16px 20px;
+          }
+
+          .title {
+            font-size: 20px;
+          }
+
+          .container {
+            padding: 0 20px;
+          }
+
+          .card-body {
+            padding: 24px 20px;
+          }
+
+          .card-header {
+            padding: 24px 20px 0 20px;
+          }
+
+          .actions {
+            flex-direction: column-reverse;
+            gap: 12px;
+          }
+
+          .btn {
+            width: 100%;
+          }
+        }
+    </style>
+</head>
+<body>
+<div class="page">
+    <header>
+        <div class="header-inner">
+            <div>
+                <h1 class="title">📚 Edit Book</h1>
+                <p class="subtitle">Update book details and inventory information</p>
+            </div>
+            <a href="/admin" class="btn btn-outline" aria-label="Back to books list">← Back to Books</a>
+        </div>
+    </header>
+
+    <main>
+        <div class="container">
+            <section class="card" aria-labelledby="edit-book-heading">
+                <!-- Added card header with better visual hierarchy -->
+                <div class="card-header">
+                    <h2 id="edit-book-heading" class="card-title">Book Information</h2>
+                    <p class="card-description">Update the book details below. All fields marked with * are required.</p>
+                </div>
+
+                <!-- Enhanced success/error alerts with icons -->
+                <div th:if="${success}" class="alert success" role="status" aria-live="polite">
+                    Book updated successfully! Your changes have been saved.
+                </div>
+                <div th:if="${error}" class="alert error" role="alert" aria-live="assertive">
+                    There was an error updating the book. Please check your information and try again.
+                </div>
+
+                <div class="card-body">
+                    <form th:action="@{/books/edit/{id}(id=${book.id})}" method="post">
+                        <div class="form-grid">
+                            <!-- Enhanced form groups with better styling and required indicators -->
+                            <div class="form-group">
+                                <label for="title" class="required">Book Title</label>
+                                <input type="text" id="title" name="title" required="required" th:value="${book.title}" placeholder="Enter the complete book title"/>
+                                <p class="helper">Example: The Pragmatic Programmer: Your Journey to Mastery</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="author" class="required">Author(s)</label>
+                                <input type="text" id="author" name="author" required="required" th:value="${book.author}" placeholder="Enter author name(s)"/>
+                                <p class="helper">Example: Andrew Hunt, David Thomas</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="category" class="required">Category</label>
+                                <input type="text" id="category" name="category" required="required" th:value="${book.category}" placeholder="Book category or genre"/>
+                                <p class="helper">Example: Programming, Fiction, History, Science</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="price" class="required">Price (USD)</label>
+                                <input type="number" step="0.01" min="0" id="price" name="price" required="required" th:value="${book.price}" placeholder="0.00"/>
+                                <p class="helper">Enter price in dollars (e.g., 29.99)</p>
+                            </div>
+
+                            <div class="form-group col-span-2">
+                                <label for="description" class="required">Description</label>
+                                <textarea id="description" name="description" rows="5" required="required" th:text="${book.description}" placeholder="Provide a detailed description of the book, including key topics, target audience, and any special features..."></textarea>
+                                <p class="helper">Include key takeaways, edition information, and what makes this book valuable</p>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="stock" class="required">Stock Quantity</label>
+                                <input type="number" min="0" id="stock" name="stock" required="required" th:value="${book.stock}" placeholder="0"/>
+                                <p class="helper">Current number of books available in inventory</p>
+                            </div>
+                        </div>
+
+                        <div class="actions">
+                            <a href="/admin" class="btn btn-outline" role="button">Cancel Changes</a>
+                            <a href="/admin"> <button type="submit" class="btn btn-primary">💾 Update Book</button></a>
+                        </div>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+</body>
+</html>

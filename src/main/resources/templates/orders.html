@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Orders Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link href="https://fonts.googleapis.com/css2?family=Amazon+Ember:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Amazon/Flipkart inspired color palette */
+            --amazon-orange: #ff9900;
+            --amazon-orange-dark: #e47911;
+            --amazon-blue: #232f3e;
+            --amazon-blue-light: #37475a;
+            --flipkart-blue: #2874f0;
+            --flipkart-orange: #ff6161;
+
+            --background: #f3f3f3;
+            --surface: #ffffff;
+            --surface-elevated: #ffffff;
+            --primary: var(--amazon-orange);
+            --primary-dark: var(--amazon-orange-dark);
+            --secondary: var(--flipkart-blue);
+            --accent: var(--flipkart-orange);
+            --text-primary: #0f1111;
+            --text-secondary: #565959;
+            --text-muted: #888c8c;
+            --border: #d5d9d9;
+            --border-light: #e7e7e7;
+            --success: #067d62;
+            --warning: #f08804;
+            --danger: #b12704;
+
+            /* Enhanced shadows */
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.1);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.12);
+            --shadow-lg: 0 8px 16px rgba(0,0,0,0.15);
+            --shadow-xl: 0 12px 24px rgba(0,0,0,0.18);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Amazon Ember', Arial, sans-serif;
+            background: var(--background);
+            color: var(--text-primary);
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        /* Amazon-style header */
+        .header {
+            background: linear-gradient(135deg, var(--amazon-blue) 0%, var(--amazon-blue-light) 100%);
+            color: white;
+            padding: 16px 0;
+            box-shadow: var(--shadow-md);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 18px;
+        }
+
+        /* Stats section */
+        .stats-section {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 24px 0;
+        }
+
+        .stats-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Main content */
+        .main-content {
+            max-width: 1200px;
+            margin: 32px auto;
+            padding: 0 24px;
+        }
+
+        .dashboard-card {
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+            border: 1px solid var(--border-light);
+        }
+
+        /* Toolbar */
+        .toolbar {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .toolbar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .subtitle {
+            color: var(--text-secondary);
+            font-size: 16px;
+            margin-top: 4px;
+        }
+
+        /* Enhanced search and filters */
+        .filters-grid {
+            display: grid;
+            gap: 20px;
+        }
+
+        .search-row {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .search-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 16px 20px 16px 50px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            font-size: 16px;
+            background: var(--surface);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.1);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            color: var(--text-muted);
+            z-index: 1;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .filter-select {
+            padding: 12px 16px;
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            font-size: 14px;
+            font-weight: 500;
+            min-width: 160px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.1);
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: white;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-secondary:hover {
+            background: #1e5dc7;
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Active filters */
+        .active-filters {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .filter-tag {
+            background: var(--primary);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: slideIn 0.3s ease;
+        }
+
+        .filter-tag .remove {
+            cursor: pointer;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        /* Table */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        .orders-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1000px;
+        }
+
+        .orders-table th {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 20px 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 89px;
+            z-index: 10;
+        }
+
+        .orders-table td {
+            padding: 20px 16px;
+            border-bottom: 1px solid var(--border-light);
+            vertical-align: middle;
+        }
+
+        .orders-table tr:hover {
+            background: rgba(255, 153, 0, 0.05);
+        }
+
+        .order-id {
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'Courier New', monospace;
+        }
+
+        .user-id {
+            font-family: 'Courier New', monospace;
+            color: var(--text-secondary);
+        }
+
+        .amount {
+            font-weight: 600;
+            font-family: 'Courier New', monospace;
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-pending {
+            background: rgba(240, 136, 4, 0.1);
+            color: var(--warning);
+            border: 1px solid rgba(240, 136, 4, 0.3);
+        }
+
+        .status-completed {
+            background: rgba(6, 125, 98, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(6, 125, 98, 0.3);
+        }
+
+        .status-cancelled {
+            background: rgba(177, 39, 4, 0.1);
+            color: var(--danger);
+            border: 1px solid rgba(177, 39, 4, 0.3);
+        }
+
+        .status-select {
+            padding: 8px 12px;
+            border: 2px solid var(--border);
+            border-radius: 6px;
+            background: var(--surface);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .status-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(255, 153, 0, 0.1);
+        }
+
+        .address-cell {
+            max-width: 250px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-secondary);
+        }
+
+        /* Footer */
+        .table-footer {
+            padding: 20px 24px;
+            background: #f8f9fa;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 16px;
+            }
+
+            .stats-container {
+                padding: 0 16px;
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .main-content {
+                padding: 0 16px;
+            }
+
+            .toolbar {
+                padding: 20px;
+            }
+
+            .search-row {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-row {
+                justify-content: center;
+            }
+
+            .orders-table th {
+                padding: 16px 12px;
+            }
+
+            .orders-table td {
+                padding: 16px 12px;
+            }
+        }
+
+        /* Animations */
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            box-shadow: var(--shadow-lg);
+            animation: slideInRight 0.3s ease;
+        }
+
+        .notification.success { background: var(--success); }
+        .notification.error { background: var(--danger); }
+        .notification.info { background: var(--secondary); }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        @keyframes slideOutRight {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    </style>
+</head>
+
+<body>
+<!-- Amazon-style header -->
+<header class="header">
+    <div class="header-content">
+        <div class="logo">
+            <div class="logo-icon">O</div>
+            <div>
+                <div>Orders Dashboard</div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Stats section -->
+<section class="stats-section">
+    <div class="stats-container">
+        <div class="stat-card">
+            <span class="stat-value" id="total-orders">0</span>
+            <span class="stat-label">Total Orders</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" id="pending-orders">0</span>
+            <span class="stat-label">Pending Orders</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" id="completed-orders">0</span>
+            <span class="stat-label">Completed Orders</span>
+        </div>
+        <div class="stat-card">
+            <span class="stat-value" id="total-revenue">₹0</span>
+            <span class="stat-label">Total Revenue</span>
+        </div>
+    </div>
+</section>
+
+<!-- Main content -->
+<main class="main-content">
+    <div class="dashboard-card">
+        <!-- Toolbar -->
+        <div class="toolbar">
+            <div class="toolbar-header">
+                <div>
+                    <h1 class="page-title">Customer Orders</h1>
+                    <p class="subtitle" th:text="'Managing '+${#lists.size(orders)}+' total orders'">Managing orders</p>
+                </div>
+                <button class="btn btn-outline" onclick="exportOrders()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7,10 12,15 17,10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    Export CSV
+                </button>
+            </div>
+
+            <div class="filters-grid">
+                <div class="search-row">
+                    <div class="search-container">
+                        <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                        <input type="search" class="search-input" id="search-input" placeholder="Search by order ID, user, address, or payment method..." />
+                    </div>
+                    <button class="btn btn-secondary" onclick="clearFilters()">Clear All</button>
+                </div>
+
+                <div class="filter-row">
+                    <select class="filter-select" id="status-filter">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <select class="filter-select" id="payment-filter">
+                        <option value="">All Payment Methods</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Card">Card</option>
+                        <option value="Cash">Cash on Delivery</option>
+                    </select>
+                    <select class="filter-select" id="date-filter">
+                        <option value="">All Time</option>
+                        <option value="today">Today</option>
+                        <option value="week">This Week</option>
+                        <option value="month">This Month</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="applyFilters()">Apply Filters</button>
+                </div>
+
+                <div class="active-filters" id="active-filters"></div>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-container">
+            <table class="orders-table" id="orders-table">
+                <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>User ID</th>
+                    <th>Total Amount</th>
+                    <th>Discount</th>
+                    <th>Status</th>
+                    <th>Payment Method</th>
+                    <th>Shipping Address</th>
+                    <th>Created Date</th>
+                </tr>
+                </thead>
+                <tbody id="orders-tbody">
+                <!-- Debug messages -->
+                <tr th:if="${orders == null}">
+                    <td colspan="8" class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="8" x2="12" y2="12"/>
+                            <line x1="12" y1="16" x2="12.01" y2="16"/>
+                        </svg>
+                        <div>Orders data is not available</div>
+                    </td>
+                </tr>
+
+                <tr th:if="${#lists.isEmpty(orders)}">
+                    <td colspan="8" class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="9" y1="9" x2="15" y2="15"/>
+                            <line x1="15" y1="9" x2="9" y2="15"/>
+                        </svg>
+                        <div>No orders found</div>
+                    </td>
+                </tr>
+
+                <!-- Data rows -->
+                <tr th:each="order : ${orders}" class="order-row">
+                    <td class="order-id" th:text="${order.id}">1023</td>
+                    <td class="user-id" th:text="${order.user.id}">56</td>
+                    <td class="amount" th:text="'₹'+${#numbers.formatDecimal(order.totalAmount, 1, 'POINT', 2, 'NONE')}">₹1,299.00</td>
+                    <td class="amount" th:text="'₹'+${#numbers.formatDecimal(order.discount, 1, 'POINT', 2, 'NONE')}">₹50.00</td>
+                    <td>
+                        <select class="status-select" th:data-order-id="${order.id}" th:value="${order.status.toLowerCase()}">
+                            <option value="pending" th:selected="${order.status.toLowerCase() == 'pending'}">Pending</option>
+                            <option value="completed" th:selected="${order.status.toLowerCase() == 'completed'}">Completed</option>
+                            <option value="cancelled" th:selected="${order.status.toLowerCase() == 'cancelled'}">Cancelled</option>
+                        </select>
+                    </td>
+                    <td th:text="${order.paymentMethod}">UPI</td>
+                    <td class="address-cell" th:text="${order.shippingAddress}">221B Baker Street, London</td>
+                    <td class="amount" th:text="${#dates.format(order.createdAt, 'dd-MM-yyyy HH:mm')}">02-12-2025 14:05</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Footer -->
+        <div class="table-footer">
+            <span>Showing <span id="showing-count">0</span> of <span id="total-count">0</span> orders</span>
+            <span>Last updated: <span id="last-updated">just now</span></span>
+        </div>
+    </div>
+</main>
+
+<script>
+    let allOrders = [];
+    let filteredOrders = [];
+    let activeFilters = {};
+
+    // Initialize the dashboard
+    document.addEventListener('DOMContentLoaded', function() {
+        loadOrders();
+        setupEventListeners();
+        updateStats();
+    });
+
+    function setupEventListeners() {
+        // Real-time search
+        document.getElementById('search-input').addEventListener('input', debounce(handleSearch, 300));
+
+        // Filter change handlers
+        document.getElementById('status-filter').addEventListener('change', handleFilterChange);
+        document.getElementById('payment-filter').addEventListener('change', handleFilterChange);
+        document.getElementById('date-filter').addEventListener('change', handleFilterChange);
+
+        // Status update handlers
+        document.querySelectorAll('.status-select').forEach(select => {
+            select.addEventListener('change', handleStatusUpdate);
+        });
+    }
+
+    function loadOrders() {
+        // Extract orders from the table
+        const rows = document.querySelectorAll('.order-row');
+        allOrders = Array.from(rows).map(row => {
+            const cells = row.querySelectorAll('td');
+            return {
+                id: cells[0].textContent,
+                userId: cells[1].textContent,
+                total: parseFloat(cells[2].textContent.replace(/[₹,]/g, '')),
+                discount: parseFloat(cells[3].textContent.replace(/[₹,]/g, '')),
+                status: cells[4].querySelector('select').value,
+                payment: cells[5].textContent,
+                address: cells[6].textContent,
+                created: cells[7].textContent,
+                element: row
+            };
+        });
+        filteredOrders = [...allOrders];
+        updateDisplay();
+    }
+
+    function handleSearch(event) {
+        const query = event.target.value.toLowerCase();
+        if (query) {
+            activeFilters.search = query;
+        } else {
+            delete activeFilters.search;
+        }
+        applyAllFilters();
+    }
+
+    function handleFilterChange(event) {
+        const filterType = event.target.id.replace('-filter', '');
+        const value = event.target.value;
+
+        if (value) {
+            activeFilters[filterType] = value;
+        } else {
+            delete activeFilters[filterType];
+        }
+
+        updateActiveFiltersDisplay();
+    }
+
+    function applyFilters() {
+        applyAllFilters();
+        showNotification('Filters applied successfully!', 'success');
+    }
+
+    function applyAllFilters() {
+        filteredOrders = allOrders.filter(order => {
+            // Search filter
+            if (activeFilters.search) {
+                const searchTerm = activeFilters.search;
+                const searchableText = `${order.id} ${order.userId} ${order.address} ${order.payment}`.toLowerCase();
+                if (!searchableText.includes(searchTerm)) return false;
+            }
+
+            // Status filter
+            if (activeFilters.status && order.status !== activeFilters.status) {
+                return false;
+            }
+
+            // Payment filter
+            if (activeFilters.payment && order.payment !== activeFilters.payment) {
+                return false;
+            }
+
+            return true;
+        });
+
+        updateDisplay();
+        updateStats();
+    }
+
+    function updateDisplay() {
+        // Hide all rows first
+        allOrders.forEach(order => {
+            order.element.style.display = 'none';
+        });
+
+        // Show filtered rows
+        filteredOrders.forEach(order => {
+            order.element.style.display = '';
+        });
+
+        // Update counts
+        document.getElementById('showing-count').textContent = filteredOrders.length;
+        document.getElementById('total-count').textContent = allOrders.length;
+
+        // Show empty state if no results
+        const tbody = document.getElementById('orders-tbody');
+        const existingEmptyState = tbody.querySelector('.empty-state-row');
+        if (existingEmptyState) {
+            existingEmptyState.remove();
+        }
+
+        if (filteredOrders.length === 0 && allOrders.length > 0) {
+            const emptyRow = document.createElement('tr');
+            emptyRow.className = 'empty-state-row';
+            emptyRow.innerHTML = `
+                <td colspan="8" class="empty-state">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                    <div>No orders match your current filters</div>
+                </td>
+            `;
+            tbody.appendChild(emptyRow);
+        }
+    }
+
+    function updateActiveFiltersDisplay() {
+        const container = document.getElementById('active-filters');
+        container.innerHTML = '';
+
+        Object.entries(activeFilters).forEach(([key, value]) => {
+            if (key === 'search') return;
+
+            const tag = document.createElement('div');
+            tag.className = 'filter-tag';
+            tag.innerHTML = `
+                ${key}: ${value}
+                <span class="remove" onclick="removeFilter('${key}')">×</span>
+            `;
+            container.appendChild(tag);
+        });
+    }
+
+    function removeFilter(filterType) {
+        delete activeFilters[filterType];
+        const select = document.getElementById(filterType + '-filter');
+        if (select) select.value = '';
+        updateActiveFiltersDisplay();
+        applyAllFilters();
+    }
+
+    function clearFilters() {
+        activeFilters = {};
+        document.getElementById('search-input').value = '';
+        document.getElementById('status-filter').value = '';
+        document.getElementById('payment-filter').value = '';
+        document.getElementById('date-filter').value = '';
+        updateActiveFiltersDisplay();
+        applyAllFilters();
+        showNotification('All filters cleared', 'info');
+    }
+
+    function updateStats() {
+        const totalOrders = filteredOrders.length;
+        const pendingOrders = filteredOrders.filter(o => o.status === 'pending').length;
+        const completedOrders = filteredOrders.filter(o => o.status === 'completed').length;
+        const totalRevenue = filteredOrders.reduce((sum, o) => sum + o.total, 0);
+
+        document.getElementById('total-orders').textContent = totalOrders;
+        document.getElementById('pending-orders').textContent = pendingOrders;
+        document.getElementById('completed-orders').textContent = completedOrders;
+        document.getElementById('total-revenue').textContent = `₹${totalRevenue.toLocaleString()}`;
+    }
+
+    async function handleStatusUpdate(event) {
+        const orderId = event.target.dataset.orderId;
+        const newStatus = event.target.value;
+        const oldValue = event.target.getAttribute('data-old-value') || event.target.value;
+
+        try {
+            const response = await fetch(`/orders/${orderId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus }),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update status');
+            }
+
+            const order = allOrders.find(o => o.id === orderId);
+            if (order) {
+                order.status = newStatus;
+            }
+
+            updateStats();
+            showNotification(`Order ${orderId} status updated to ${newStatus}`, 'success');
+
+        } catch (error) {
+            event.target.value = oldValue;
+            showNotification('Failed to update status: ' + error.message, 'error');
+        }
+    }
+
+    function exportOrders() {
+        const csv = generateCSV(filteredOrders);
+        downloadCSV(csv, 'orders-export.csv');
+        showNotification('Orders exported successfully!', 'success');
+    }
+
+    function generateCSV(orders) {
+        const headers = ['Order ID', 'User ID', 'Total', 'Discount', 'Status', 'Payment', 'Address', 'Created'];
+        const rows = orders.map(order => [
+            order.id, order.userId, order.total, order.discount,
+            order.status, order.payment, order.address, order.created
+        ]);
+
+        return [headers, ...rows].map(row =>
+            row.map(field => `"${field}"`).join(',')
+        ).join('\n');
+    }
+
+    function downloadCSV(csv, filename) {
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    function debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    }
+</script>
+</body>
+</html>

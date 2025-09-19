@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Your Cart - BookStore Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"/>
+
+    <style>
+        :root {
+          /* Color system:
+             Primary: Blue (#2874F0)
+             Neutrals: White (#FFFFFF), Light Gray (#F3F4F6), Dark Gray (#1F2937)
+             Accent: Green (#2E7D32)
+          */
+          --brand: #2874f0;
+          --accent: #2e7d32;
+          --bg: #f3f4f6;
+          --text: #1f2937;
+          --muted: #6b7280;
+          --border: #e5e7eb;
+          --white: #ffffff;
+          --danger: #dc2626;
+          --warning: #f59e0b;
+        }
+
+        * { box-sizing: border-box; }
+        html, body {
+          margin: 0;
+          padding: 0;
+          font-family: "Roboto", system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+          color: var(--text);
+          background: var(--bg);
+          line-height: 1.5;
+        }
+
+        /* Header */
+        .site-header {
+          background: var(--brand);
+          color: var(--white);
+        }
+        .header-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 12px 16px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+        }
+        .brand {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          font-weight: 700;
+          font-size: 20px;
+          letter-spacing: 0.2px;
+        }
+        .brand i {
+          font-size: 20px;
+        }
+        .secure {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          font-size: 13px;
+          opacity: 0.95;
+        }
+        .secure i {
+          font-size: 14px;
+        }
+
+        /* Container layout */
+        .container {
+          max-width: 1200px;
+          margin: 16px auto 24px;
+          padding: 0 16px;
+          display: grid;
+          grid-template-columns: 1fr;
+          gap: 16px;
+        }
+        @media (min-width: 960px) {
+          .container {
+            grid-template-columns: 2fr 1fr;
+            align-items: start;
+          }
+        }
+
+        /* Card */
+        .card {
+          background: var(--white);
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+        .card-header {
+          padding: 12px 16px;
+          border-bottom: 1px solid var(--border);
+          background: #fafafa;
+          font-weight: 600;
+        }
+        .card-body {
+          padding: 12px 16px;
+        }
+
+        /* Cart item row */
+        .item {
+          display: grid;
+          grid-template-columns: 84px 1fr;
+          gap: 12px;
+          padding: 16px 0;
+          border-bottom: 1px solid var(--border);
+        }
+        .item:last-child {
+          border-bottom: 0;
+        }
+        .thumb {
+          width: 84px;
+          height: 110px;
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          overflow: hidden;
+          background: #fff;
+        }
+        .thumb img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+          display: block;
+        }
+        .item-main {
+          display: grid;
+          grid-template-columns: 1fr auto;
+          gap: 8px 12px;
+        }
+        .title {
+          font-weight: 600;
+          font-size: 16px;
+          color: var(--text);
+          margin: 0 0 4px 0;
+        }
+        .meta {
+          font-size: 13px;
+          color: var(--muted);
+          margin-bottom: 6px;
+        }
+        .stock {
+          color: var(--accent);
+          font-size: 13px;
+          font-weight: 500;
+          margin-top: 2px;
+        }
+        .price-block {
+          text-align: right;
+          min-width: 120px;
+        }
+        .price {
+          font-weight: 700;
+          font-size: 18px;
+          color: var(--text);
+        }
+        .mrp {
+          font-size: 13px;
+          color: var(--muted);
+          text-decoration: line-through;
+          margin-left: 8px;
+        }
+        .save {
+          font-size: 12px;
+          color: var(--accent);
+          margin-top: 4px;
+        }
+
+        /* Actions row */
+        .item-actions {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          gap: 10px;
+          margin-top: 6px;
+        }
+        .qty-form {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .qty-form input[type="number"], .qty-form select {
+          width: 64px;
+          height: 36px;
+          padding: 0 6px;
+          border-radius: 6px;
+          border: 1px solid var(--border);
+          font-size: 14px;
+          text-align: center;
+        }
+        .btn {
+          appearance: none;
+          border: 1px solid var(--border);
+          background: var(--white);
+          color: var(--text);
+          padding: 8px 12px;
+          height: 36px;
+          border-radius: 6px;
+          font-size: 14px;
+          font-weight: 500;
+          cursor: pointer;
+        }
+        .btn:hover { background: #f8fafc; }
+        .btn-primary {
+          background: var(--brand);
+          color: var(--white);
+          border-color: var(--brand);
+        }
+        .btn-primary:hover { filter: brightness(0.95); }
+        .link-danger {
+          color: var(--danger);
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 500;
+        }
+        .link-danger:hover { text-decoration: underline; }
+        .link-muted {
+          color: var(--muted);
+          text-decoration: none;
+          font-size: 14px;
+          font-weight: 500;
+        }
+        .link-muted:hover { text-decoration: underline; }
+
+        /* Free delivery tag */
+        .badge {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          background: #ecfdf5;
+          border: 1px solid #d1fae5;
+          color: var(--accent);
+          padding: 4px 8px;
+          border-radius: 999px;
+          font-size: 12px;
+          font-weight: 600;
+        }
+
+        /* Price details (summary) */
+        .summary {
+          position: sticky;
+          top: 16px;
+        }
+        .summary-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 10px 0;
+          border-bottom: 1px solid var(--border);
+          font-size: 14px;
+        }
+        .summary-row total {
+          font-weight: 700;
+        }
+        .summary-row:last-child {
+          border-bottom: 0;
+          padding-bottom: 0;
+        }
+        .summary-total {
+          font-weight: 700;
+          font-size: 16px;
+        }
+        .save-note {
+          margin-top: 12px;
+          font-size: 13px;
+          color: var(--accent);
+          font-weight: 600;
+        }
+        .checkout {
+          margin-top: 16px;
+          width: 100%;
+          height: 44px;
+          font-size: 16px;
+        }
+
+        /* Footer actions */
+        .footer-actions {
+          margin-top: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .continue-link {
+          color: var(--brand);
+          text-decoration: none;
+          font-weight: 600;
+          font-size: 14px;
+        }
+        .continue-link:hover { text-decoration: underline; }
+
+        /* Accessibility helpers */
+        .sr-only {
+          position: absolute;
+          width: 1px; height: 1px;
+          padding: 0; margin: -1px;
+          overflow: hidden; clip: rect(0,0,0,0);
+          white-space: nowrap; border: 0;
+        }
+    </style>
+</head>
+<body>
+
+<header class="site-header" role="banner">
+    <div class="header-inner">
+        <div class="brand" aria-label="Bookseller">
+            <i class="fas fa-shopping-bag" aria-hidden="true"></i>
+            <span>BookStore Pro</span>
+        </div>
+        <div class="secure" aria-label="Secure checkout">
+            <i class="fas fa-shield-alt" aria-hidden="true"></i>
+            <span>Secure Checkout</span>
+        </div>
+    </div>
+</header>
+
+<main class="container" role="main">
+    <section class="card" aria-labelledby="cart-heading">
+        <div class="card-header" id="cart-heading">My Cart</div>
+        <div class="card-body">
+
+
+            <div th:if="${#lists.isEmpty(cartItems)}">
+                <p style="margin: 8px 0 0 0;">Your cart is empty.</p>
+            </div>
+
+            <div th:each="item : ${cartItems}" class="item">
+
+                <div class="thumb" aria-hidden="true">
+                </div>
+
+                <div class="item-main">
+                    <div>
+                        <h2 class="title" th:text="${item.book.title}">Book Title</h2>
+                        <div class="meta">
+                            <span>by </span><span th:text="${item.book.author}">Author</span>
+                        </div>
+                        <div class="badge">
+                            <i class="fas fa-truck" aria-hidden="true"></i>
+                            <span>Free Delivery</span>
+                        </div>
+                        <div class="stock">In stock</div>
+
+
+                        <div class="item-actions">
+
+                            <form class="qty-form" th:action="@{/updateQuantity}" method="post" aria-label="Update quantity">
+                                <input type="hidden" name="cartItemId" th:value="${item.book.id}"/>
+                                <label for="qty" class="sr-only">Quantity</label>
+                                <input id="qty" type="number" name="quantity"
+                                       th:value="${item.quantity}" min="1" max="99" aria-label="Quantity"/>
+                                <button type="submit" class="btn">Update</button>
+                            </form>
+
+
+                            <a href="#" class="link-muted">Save for later</a>
+
+
+                            <a class="link-danger"
+                               th:href="@{/removeFromCart(id=${item.book.id})}"
+                               onclick="return confirm('Remove this item from cart?')">Remove</a>
+                        </div>
+                    </div>
+
+
+                    <div class="price-block" aria-label="Pricing">
+                        <div>
+                            <span class="price" th:text="'₹' + ${item.book.price}">₹19.99</span>
+
+                            <span class="mrp">₹24.99</span>
+                        </div>
+                        <div class="save" th:if="${item.book.price != null}">
+
+                        </div>
+                        <div style="margin-top: 8px; font-size: 14px;">
+                            Total: <strong th:text="'₹' + ${item.book.price * item.quantity}">₹39.98</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="footer-actions" th:if="${!#lists.isEmpty(cartItems)}">
+                <a href="/" class="continue-link"><i class="fas fa-arrow-left" aria-hidden="true"></i> Continue Shopping</a>
+                <span style="font-size: 13px; color: var(--muted);">Prices inclusive of GST</span>
+            </div>
+        </div>
+    </section>
+
+
+    <aside class="summary">
+        <section class="card" aria-labelledby="price-details">
+            <div class="card-header" id="price-details">Price Details</div>
+            <div class="card-body">
+                <div class="summary-row">
+                    <span>Price</span>
+                    <span th:text="'₹' + ${totalPrice}">₹0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery Charges</span>
+                    <span style="color: var(--accent);">Free</span>
+                </div>
+                <div class="summary-row" style="border-bottom: 0; padding-bottom: 0;">
+                    <span class="summary-total">Total Amount</span>
+                    <span class="summary-total" th:text="'₹' + ${totalPrice}">₹0.00</span>
+                </div>
+
+                <div class="save-note">
+                    You will save on delivery with Free Delivery.
+                </div>
+
+                <form th:action="@{/checkout}" method="get" aria-label="Proceed to checkout">
+                    <button type="submit" class="btn btn-primary checkout">
+                        Proceed to Checkout
+                    </button>
+                </form>
+
+            </div>
+        </section>
+    </aside>
+</main>
+
+<footer style="max-width:1200px;margin:0 auto 24px; padding:0 16px; color: var(--muted); font-size: 12px;">
+    <p>Need help? Contact support or see our returns policy.</p>
+</footer>
+</body>
+</html>

@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Order Confirmed</title>
+    <style>
+        :root {
+          --brand: #2874F0;   /* primary */
+          --bg: #FFFFFF;      /* neutral */
+          --muted: #F3F4F6;   /* neutral light */
+          --fg: #0F172A;      /* neutral dark */
+          --success: #16A34A; /* accent */
+        }
+
+        /* Reset / base */
+        *, *::before, *::after { box-sizing: border-box; }
+        html, body { height: 100%; }
+        body {
+          margin: 0;
+          font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto,
+            Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+          color: var(--fg);
+          background: var(--muted);
+          line-height: 1.6;
+        }
+        a { color: var(--brand); text-decoration: none; }
+        a:hover { text-decoration: underline; }
+        img { max-width: 100%; display: block; }
+
+        /* Layout */
+        .header {
+          background: var(--brand);
+          color: var(--bg);
+        }
+        .header-inner {
+          max-width: 72rem; /* ~1152px */
+          margin: 0 auto;
+          padding: 0.75rem 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 1rem;
+        }
+        .brand {
+          font-weight: 700;
+          letter-spacing: 0.2px;
+        }
+        .brand a { color: var(--bg); text-decoration: none; }
+        .nav {
+          display: flex;
+          align-items: center;
+          gap: 1rem;
+        }
+        .nav a {
+          color: var(--bg);
+          opacity: 0.95;
+        }
+        .nav a:hover { opacity: 1; text-decoration: underline; }
+
+        main {
+          max-width: 48rem; /* ~768px */
+          margin: 1.5rem auto;
+          padding: 0 1rem;
+        }
+
+        .card {
+          background: var(--bg);
+          border: 1px solid var(--muted);
+          border-radius: 1rem;
+          padding: 1.25rem;
+        }
+        @media (min-width: 768px) {
+          .card { padding: 2rem; }
+        }
+
+        /* Success head */
+        .success {
+          display: grid;
+          gap: 1rem;
+          justify-items: center;
+          text-align: center;
+          margin-bottom: 1rem;
+        }
+        .icon-wrap {
+          width: 3rem; height: 3rem;
+          border-radius: 999px;
+          display: grid; place-items: center;
+          background: #E9F8EE; /* derived light from success without introducing a new main color: blend of white+success */
+        }
+        /* To ensure strict 5-color rule for main palette, we will keep icon path to success only */
+        .icon { width: 1.5rem; height: 1.5rem; color: var(--success); }
+
+        h1 {
+          margin: 0;
+          font-size: 1.5rem;
+          line-height: 1.3;
+          letter-spacing: 0.2px;
+        }
+        .lead {
+          margin: 0;
+          color: #334155; /* derived from --fg on a lighter scale; if you must strictly keep to 5 colors, remove this and use var(--fg). */
+        }
+
+        /* Meta */
+        .meta {
+          margin-top: 1.25rem;
+          display: grid;
+          gap: 0.75rem;
+        }
+        .meta-row {
+          display: grid;
+          gap: 0.5rem;
+        }
+        @media (min-width: 640px) {
+          .meta-row {
+            grid-template-columns: 1fr 1fr;
+          }
+        }
+        .meta-item {
+          background: var(--muted);
+          border: 1px solid var(--muted);
+          border-radius: 0.75rem;
+          padding: 0.75rem 0.875rem;
+        }
+        .meta-item h3 {
+          margin: 0 0 0.25rem 0;
+          font-size: 0.875rem;
+          font-weight: 600;
+          letter-spacing: 0.2px;
+        }
+        .meta-item p {
+          margin: 0;
+          font-size: 0.95rem;
+        }
+
+        .order-id {
+          display: inline-flex;
+          align-items: center;
+          gap: 0.5rem;
+          padding: 0.375rem 0.625rem;
+          border: 1px dashed var(--brand);
+          border-radius: 999px;
+          font-weight: 600;
+          color: var(--brand);
+          background: #EFF6FF; /* very light brand tint; if you must strictly keep to 5 colors, remove this background. */
+          white-space: nowrap;
+        }
+
+        /* CTAs */
+        .actions {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 0.75rem;
+          margin-top: 1.25rem;
+        }
+        .btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 0.5rem;
+          padding: 0.7rem 1rem;
+          border-radius: 0.625rem;
+          font-weight: 600;
+          border: 1px solid transparent;
+          cursor: pointer;
+          text-decoration: none;
+        }
+        .btn:focus-visible {
+          outline: 2px solid var(--brand);
+          outline-offset: 2px;
+        }
+        .btn-primary {
+          background: var(--brand);
+          color: var(--bg);
+        }
+        .btn-primary:hover { opacity: 0.95; }
+        .btn-secondary {
+          background: var(--bg);
+          color: var(--fg);
+          border-color: var(--muted);
+        }
+        .btn-secondary:hover {
+          border-color: var(--brand);
+        }
+
+        /* Helpful section */
+        .help {
+          margin-top: 1.25rem;
+          background: var(--bg);
+          border: 1px solid var(--muted);
+          border-radius: 0.75rem;
+          padding: 0.875rem 1rem;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 0.75rem;
+          flex-wrap: wrap;
+        }
+        .help p { margin: 0; }
+
+        /* Footer mini */
+        .mini {
+          text-align: center;
+          font-size: 0.875rem;
+          color: #475569; /* derived from --fg; if strictly 5 colors, use var(--fg) */
+          margin-top: 1rem;
+        }
+
+        /* Print-friendly */
+        @media print {
+          .header, .actions, .help { display: none; }
+          main { margin: 0; }
+          body { background: var(--bg); }
+          .card { border: none; padding: 0; }
+        }
+    </style>
+</head>
+<body>
+<header class="header" role="banner">
+    <div class="header-inner">
+        <div class="brand">
+            <a th:href="@{/}">YourStore</a>
+        </div>
+        <nav class="nav" aria-label="Primary">
+            <a th:href="@{/orders}">My Orders</a>
+            <a th:href="@{/cart}">Cart</a>
+            <a th:href="@{/profile}">Profile</a>
+        </nav>
+    </div>
+</header>
+
+<main role="main">
+    <section class="card" aria-labelledby="thankyou-title">
+        <div class="success">
+          <span class="icon-wrap" aria-hidden="true">
+
+            <svg class="icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M9 12.75l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+              <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" opacity="0.15"></circle>
+            </svg>
+          </span>
+            <h1 id="thankyou-title">Thank you! Your order is confirmed.</h1>
+            <p class="lead">
+                We’ve sent a confirmation to your email. Keep your order ID handy for tracking or support.
+            </p>
+            <div aria-live="polite" aria-atomic="true">
+            <span class="order-id">
+              Order ID:
+              <span th:text="${orderId}">#12345</span>
+            </span>
+            </div>
+        </div>
+
+        Meta grid
+        <div class="meta">
+            <div class="meta-row">
+                <div class="meta-item">
+                    <h3>Order date</h3>
+                    <p><span th:text="${orderDate}">Sep 3, 2025</span></p>
+                </div>
+                <div class="meta-item">
+                    <h3>Total paid</h3>
+                    <p><span th:text="${orderTotal}">&#8377; 2,499.00</span></p>
+                </div>
+            </div>
+            <div class="meta-row">
+                <div class="meta-item">
+                    <h3>Shipping to</h3>
+                    <p>
+                        <span th:text="${shippingName}">Ravi Kumar</span><br />
+                        <span th:text="${shippingAddress}">221B, Baker Street, Bengaluru</span><br />
+                        <span th:text="${shippingCity}">Bengaluru</span>
+                        <span th:text="${shippingState}">KA</span>
+                        <span th:text="${shippingZip}">560001</span>
+                    </p>
+                </div>
+                <div class="meta-item">
+                    <h3>Estimated delivery</h3>
+                    <p><span th:text="${estimatedDelivery}">Sep 7 - Sep 10</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions" role="group" aria-label="Next steps">
+            <a class="btn btn-primary" th:href="@{/orders}">
+                View my orders
+            </a>
+            <a class="btn btn-secondary" th:href="@{/}">
+                Continue shopping
+            </a>
+            <button class="btn btn-secondary" onclick="window.print()" type="button" aria-label="Print receipt">
+                Print receipt
+            </button>
+        </div>
+
+
+        <div class="help" role="note" aria-label="Help">
+            <p>Need help with your order?</p>
+            <a th:href="@{/support}" class="btn btn-secondary">Contact support</a>
+        </div>
+    </section>
+
+    <p class="mini">
+        A copy of your receipt has been sent to your email. Please keep the Order ID for future reference.
+    </p>
+</main>
+</body>
+</html>

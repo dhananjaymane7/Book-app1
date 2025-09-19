@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookStore Assistant - Customer Support</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .chatbot-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 800px;
+            height: 600px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #232f3e 0%, #131921 100%);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .chat-header p {
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        .status-indicator {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            background: #00d084;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .message.user {
+            flex-direction: row-reverse;
+        }
+
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: white;
+        }
+
+        .message.bot .message-avatar {
+            background: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%);
+        }
+
+        .message.user .message-avatar {
+            background: linear-gradient(135deg, #232f3e 0%, #131921 100%);
+        }
+
+        .message-content {
+            max-width: 70%;
+            padding: 12px 16px;
+            border-radius: 18px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .message.bot .message-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-bottom-left-radius: 4px;
+        }
+
+        .message.user .message-content {
+            background: linear-gradient(135deg, #232f3e 0%, #131921 100%);
+            color: white;
+            border-bottom-right-radius: 4px;
+        }
+
+        .quick-replies {
+            padding: 0 20px 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .quick-reply-btn {
+            background: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quick-reply-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+        }
+
+        .chat-input-container {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .chat-input-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s ease;
+        }
+
+        .chat-input:focus {
+            border-color: #ff9500;
+        }
+
+        .send-btn {
+            background: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%);
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #ff9500;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes typing {
+            0%, 60%, 100% { transform: translateY(0); }
+            30% { transform: translateY(-10px); }
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .welcome-message h2 {
+            color: #232f3e;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .chatbot-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+
+            .message-content {
+                max-width: 85%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="chatbot-container">
+    <div class="chat-header">
+        <h1><i class="fas fa-book"></i> BookStore Assistant</h1>
+        <p>Get instant help with your book shopping needs</p>
+        <div class="status-indicator">
+            <div class="status-dot"></div>
+            <span style="font-size: 12px;">Online</span>
+        </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages">
+        <div class="welcome-message">
+            <h2>👋 Welcome to BookStore Support!</h2>
+            <p>I'm here to help you with orders, shipping, returns, and book recommendations. How can I assist you today?</p>
+        </div>
+    </div>
+
+    <div class="typing-indicator" id="typingIndicator">
+        <div class="message-avatar" style="background: linear-gradient(135deg, #ff9500 0%, #ff6b35 100%);">
+            <i class="fas fa-robot"></i>
+        </div>
+        <div class="typing-dots">
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+            <div class="typing-dot"></div>
+        </div>
+    </div>
+
+    <div class="quick-replies" id="quickReplies">
+        <button class="quick-reply-btn" onclick="sendQuickReply('Track my order')">📦 Track Order</button>
+        <button class="quick-reply-btn" onclick="sendQuickReply('Return policy')">🔄 Returns</button>
+        <button class="quick-reply-btn" onclick="sendQuickReply('Book recommendations')">📚 Recommendations</button>
+        <button class="quick-reply-btn" onclick="sendQuickReply('Shipping info')">🚚 Shipping</button>
+        <button class="quick-reply-btn" onclick="sendQuickReply('Account help')">👤 Account</button>
+    </div>
+
+    <div class="chat-input-container">
+        <div class="chat-input-wrapper">
+            <input type="text" class="chat-input" id="userMessage" placeholder="Type your message here..." onkeypress="handleKeyPress(event)">
+            <button class="send-btn" onclick="sendMessage()">
+                <i class="fas fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatbotResponses = {
+    // Order Management
+    'track my order': 'To track your order, please provide your order number or check the "My Orders" section in your account. You can also use our order tracking page with your email and order ID.',
+    'order status': 'You can check your order status in your account dashboard or by entering your order number on our tracking page. Orders typically process within 24 hours.',
+    'cancel order': 'Orders can be cancelled within 2 hours of placement if they haven\'t been shipped yet. Go to "My Orders" and click "Cancel" next to your order.',
+    'modify order': 'Unfortunately, orders cannot be modified once placed. You can cancel and place a new order if it hasn\'t shipped yet.',
+
+    // Shipping Information
+    'shipping info': 'We offer free shipping on orders over $25. Standard delivery takes 3-5 business days, express delivery takes 1-2 business days. International shipping is available to most countries.',
+    'delivery time': 'Standard delivery: 3-5 business days, Express delivery: 1-2 business days, International: 7-14 business days depending on location.',
+    'shipping cost': 'Free shipping on orders over $25. Standard shipping: $4.99, Express shipping: $9.99. International rates vary by destination.',
+    'international shipping': 'Yes, we ship internationally to most countries. Shipping costs and delivery times vary by destination. Customs fees may apply.',
+
+    // Returns & Refunds
+    'return policy': 'We accept returns within 30 days of delivery. Books must be in original condition. Return shipping is free for defective items, $5.99 for other returns.',
+    'return book': 'To return a book, go to "My Orders", select the item, and click "Return". Print the prepaid label and drop off at any post office.',
+    'refund': 'Refunds are processed within 3-5 business days after we receive your return. You\'ll receive an email confirmation when processed.',
+    'exchange book': 'We don\'t offer direct exchanges. Please return the original book and place a new order for the replacement.',
+
+    // Account Management
+    'account help': 'For account issues, you can reset your password, update profile information, or manage payment methods in your account settings.',
+    'forgot password': 'Click "Forgot Password" on the login page and enter your email. You\'ll receive a reset link within a few minutes.',
+    'update address': 'You can update your shipping address in "Account Settings" > "Addresses". Changes apply to future orders only.',
+    'payment methods': 'We accept all major credit cards, PayPal, Apple Pay, and Google Pay. You can manage payment methods in your account.',
+
+    // Book Information
+    'book recommendations': 'I\'d be happy to recommend books! What genres do you enjoy? We have bestsellers, new releases, classics, and books by category like fiction, non-fiction, mystery, romance, and more.',
+    'book availability': 'You can check book availability on the product page. If it\'s out of stock, you can add it to your wishlist to be notified when it\'s back.',
+    'book condition': 'We sell both new and used books. The condition is clearly marked on each product page. Used books are graded as "Like New", "Very Good", "Good", or "Acceptable".',
+    'ebook format': 'Our ebooks are available in PDF, EPUB, and MOBI formats. You can download them immediately after purchase from your account.',
+
+    // Pricing & Discounts
+    'price match': 'We offer price matching on identical items from major competitors. Contact customer service with the competitor\'s price and we\'ll match it.',
+    'discounts': 'We regularly offer discounts through email newsletters, seasonal sales, and student discounts. Check our "Deals" section for current offers.',
+    'bulk orders': 'For bulk orders (50+ books), please contact our sales team for special pricing and shipping arrangements.',
+
+    // Technical Support
+    'website issues': 'If you\'re experiencing website issues, try clearing your browser cache or using a different browser. Contact support if problems persist.',
+    'mobile app': 'Our mobile app is available on iOS and Android. Download it from the App Store or Google Play for easy shopping on the go.',
+
+    // General Information
+    'store hours': 'Our online store is available 24/7. Customer service is available Monday-Friday 9AM-6PM EST, Saturday 10AM-4PM EST.',
+    'contact support': 'You can reach customer support via email at support@bookstore.com, phone at 1-800-BOOKS-01, or through this chat.',
+    'about us': 'We\'re a leading online bookstore with over 1 million titles. We\'ve been serving book lovers since 2010 with fast shipping and excellent customer service.',
+
+    // New additions
+
+    // Gift Cards
+    'gift card': 'We offer gift cards in various denominations, which can be purchased online and sent via email or physical mail. You can use gift cards during checkout.',
+
+    // Payment Issues
+    'payment declined': 'If your payment was declined, please check your card details or contact your bank. You can also try a different payment method or contact our support for assistance.',
+    'refund status': 'Refunds usually take 3-5 business days to process after the return is received. You will get an email confirmation once the refund is complete.',
+
+    // Preorders
+    'preorder': 'You can preorder upcoming books by visiting the product page. Preordered items will be shipped on the release date, and you will be charged at the time of preorder.',
+
+    // Loyalty Program
+    'loyalty program': 'Join our loyalty program to earn points on every purchase. Points can be redeemed for discounts on future orders. Sign up through your account dashboard.',
+
+    // Order Confirmation
+    'order confirmation': 'You will receive an order confirmation email immediately after your purchase with details and estimated delivery date.',
+
+    // Damaged Items
+    'damaged item': 'If you receive a damaged or defective item, please contact us within 7 days with photos of the damage. We will arrange a replacement or refund promptly.',
+
+    // Wishlist
+    'wishlist': 'You can add books to your wishlist by clicking the heart icon on the product page. We will notify you when those books are back in stock or on sale.',
+
+    // Cancel Subscription
+    'cancel subscription': 'To cancel your subscription, go to your account settings > subscriptions and follow the cancellation instructions. If you need help, just ask!',
+
+    // Default responses
+    'hello': 'Hello! Welcome to BookStore. I\'m here to help you with any questions about books, orders, shipping, or your account. How can I assist you today?',
+    'hi': 'Hi there! How can I help you with your book shopping today?',
+    'help': 'I can help you with: 📦 Order tracking, 🚚 Shipping info, 🔄 Returns & refunds, 👤 Account management, 📚 Book recommendations, 💰 Pricing & discounts. What would you like to know?',
+    'thanks': 'You\'re welcome! Is there anything else I can help you with today?',
+    'thank you': 'You\'re very welcome! Feel free to ask if you need any other assistance.',
+    'bye': 'Goodbye! Thank you for choosing BookStore. Have a great day and happy reading! 📚'
+};
+
+
+    function addMessage(content, isUser = false) {
+        const messagesContainer = document.getElementById('chatMessages');
+        const welcomeMessage = messagesContainer.querySelector('.welcome-message');
+        if (welcomeMessage) {
+            welcomeMessage.remove();
+        }
+
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
+
+        messageDiv.innerHTML = `
+            <div class="message-avatar">
+                <i class="fas fa-${isUser ? 'user' : 'robot'}"></i>
+            </div>
+            <div class="message-content">${content}</div>
+        `;
+
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function showTypingIndicator() {
+        document.getElementById('typingIndicator').style.display = 'flex';
+        const messagesContainer = document.getElementById('chatMessages');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    function hideTypingIndicator() {
+        document.getElementById('typingIndicator').style.display = 'none';
+    }
+
+    function getBotResponse(userMessage) {
+        const message = userMessage.toLowerCase().trim();
+
+        // Check for exact matches first
+        if (chatbotResponses[message]) {
+            return chatbotResponses[message];
+        }
+
+        // Check for partial matches
+        for (const [key, response] of Object.entries(chatbotResponses)) {
+            if (message.includes(key) || key.includes(message)) {
+                return response;
+            }
+        }
+
+        // Default response for unmatched queries
+        return "I'd be happy to help! I can assist you with orders, shipping, returns, book recommendations, account issues, and more. Could you please be more specific about what you need help with?";
+    }
+
+    function sendMessage() {
+        const input = document.getElementById('userMessage');
+        const message = input.value.trim();
+
+        if (message === '') return;
+
+        // Add user message
+        addMessage(message, true);
+        input.value = '';
+
+        // Show typing indicator
+        showTypingIndicator();
+
+        // Simulate bot response delay
+        setTimeout(() => {
+            hideTypingIndicator();
+            const response = getBotResponse(message);
+            addMessage(response, false);
+        }, 1000 + Math.random() * 1000);
+    }
+
+    function sendQuickReply(message) {
+        document.getElementById('userMessage').value = message;
+        sendMessage();
+    }
+
+    function handleKeyPress(event) {
+        if (event.key === 'Enter') {
+            sendMessage();
+        }
+    }
+
+    // Initialize with a welcome message
+    setTimeout(() => {
+        addMessage("Hello! I'm your BookStore assistant. I can help you with orders, shipping, returns, book recommendations, and account questions. What can I help you with today? 😊", false);
+    }, 1000);
+</script>
+</body>
+</html>
