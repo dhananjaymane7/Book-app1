@@ -39,6 +39,7 @@ public class SecurityConfig {
                                                                 "/css/**",
                                                                 "/js/**",
                                                                 "/checkout",
+                                                                "/books",
                                                                 "/orders/checkout",
                                                                 "/exchange/exchange-orders",
                                                                 "/exchange/admin/exchange-orders",
