@@ -98,20 +98,50 @@
     <button id="rzp-button1">Pay Now</button>
 </div>
 
+<!--<script th:inline="javascript">-->
+<!--    var options = {-->
+<!--        key: /*[[${key}]]*/,-->
+<!--        amount: /*[[${amount}]]*/,-->
+<!--        currency: /*[[${currency}]]*/,-->
+<!--        name: 'Your Shop Name',-->
+<!--        description: 'Order Payment',-->
+<!--        order_id: /*[[${razorpayOrderId}]]*/,-->
+<!--        handler: function (response) {-->
+<!--            console.log("Payment successful:", response);-->
+<!--            alert("Payment successful! Payment ID: " + response.razorpay_payment_id);-->
+<!--            // Optionally redirect user or update UI here-->
+<!--            window.location.href = "/";-->
+
+<!--        },-->
+<!--        prefill: {-->
+<!--            name: 'Dhananjay Phattesing Mane',-->
+<!--            email: 'mane.dhananjay.p@gmail.com',-->
+<!--            contact: '8485054613'-->
+<!--        },-->
+<!--        theme: {-->
+<!--            color: '#3399cc'-->
+<!--        }-->
+<!--    };-->
+
+<!--    var rzp = new Razorpay(options);-->
+<!--    document.getElementById('rzp-button1').onclick = function (e) {-->
+<!--        rzp.open();-->
+<!--        e.preventDefault();-->
+<!--    }-->
+<!--</script>-->
+
 <script th:inline="javascript">
     var options = {
-        key: /*[[${key}]]*/,
-        amount: /*[[${amount}]]*/,
-        currency: /*[[${currency}]]*/,
+        key: '[[${key}]]',
+        amount: [[${amount}]],   // in paise
+        currency: '[[${currency}]]',
         name: 'Your Shop Name',
         description: 'Order Payment',
-        order_id: /*[[${razorpayOrderId}]]*/,
+        order_id: '[[${razorpayOrderId}]]',   // ✅ from Razorpay
         handler: function (response) {
             console.log("Payment successful:", response);
             alert("Payment successful! Payment ID: " + response.razorpay_payment_id);
-            // Optionally redirect user or update UI here
             window.location.href = "/";
-
         },
         prefill: {
             name: 'Dhananjay Phattesing Mane',
@@ -129,6 +159,7 @@
         e.preventDefault();
     }
 </script>
+
 
 <div class="footer-note">
     &copy; 2025 Your Shop Name. All rights reserved.
