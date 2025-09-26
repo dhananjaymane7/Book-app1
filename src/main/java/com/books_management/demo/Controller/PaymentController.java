@@ -77,7 +77,6 @@ public class PaymentController {
         model.addAttribute("key", razorpayKeyId);
         model.addAttribute("orderId", orderId);
 
-        return "payment"; // The payment page that launches Razorpay checkout
+        return "payment";
     }
-
 }

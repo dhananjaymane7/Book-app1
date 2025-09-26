@@ -26,43 +26,43 @@ public class SecurityConfig {
                 return new BCryptPasswordEncoder();
         }
 
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-                http
-                                .csrf(Customizer.withDefaults())
-                                .authorizeHttpRequests(auth -> auth
-                                                .requestMatchers(
-                                                                "/register",
-                                                                "/api/register",
-                                                                "/login",
-                                                                "/profile",
-                                                                "/css/**",
-                                                                "/js/**",
-                                                                "/checkout",
-                                                                "/books",
-                                                                "/orders/checkout",
-                                                                "/exchange/exchange-orders",
-                                                                "/exchange/admin/exchange-orders",
-                                                                "/admin/exchange-orders",
-                                                                "/exchange",
-                                                                "/chatbot",
-                                                                "/chat",
-                                                                "/exchange/**")
-                                                .permitAll()
-                                                .anyRequest().authenticated())
-                                .formLogin(form -> form
-                                                .loginPage("/login")
-                                                .loginProcessingUrl("/login")
-                                                .defaultSuccessUrl("/", true)
-                                                .failureUrl("/login?error=true")
-                                                .permitAll())
-                                .logout(logout -> logout
-                                                .logoutUrl("/logout")
-                                                .logoutSuccessUrl("/login?logout=true")
-                                                .permitAll())
-                                .exceptionHandling(exception -> exception.accessDeniedPage("/access-denied"));
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/orders/**", "/razorpay/**")
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/register",
+                                "/api/register",
+                                "/login",
+                                "/profile",
+                                "/css/**",
+                                "/js/**",
+                                "/checkout",
+                                "/books",
+                                "/orders/**",
+                                "/exchange/**",
+                                "/chatbot",
+                                "/chat"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl("/", true)
+                        .failureUrl("/login?error=true")
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout=true")
+                        .permitAll()
+                )
+                .exceptionHandling(exception -> exception.accessDeniedPage("/access-denied"));
 
-                return http.build();
-        }
-
+        return http.build();
+    }
 }

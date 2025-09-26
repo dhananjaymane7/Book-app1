@@ -161,10 +161,6 @@ public class OrderController {
         return "orders";
     }
 
-    /**
-     * Update order status (for inline editing).
-     * This should be called via AJAX.
-     */
     @PostMapping("/{orderId}/status")
     @ResponseBody
     public ResponseEntity<?> updateOrderStatus(
